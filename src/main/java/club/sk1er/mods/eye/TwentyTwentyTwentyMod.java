@@ -1,19 +1,17 @@
 package club.sk1er.mods.eye;
 
-
 import club.sk1er.mods.eye.utils.Multithreading;
 import club.sk1er.mods.eye.utils.Sk1erMod;
 import com.google.gson.Gson;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -44,7 +42,6 @@ public class TwentyTwentyTwentyMod {
     private KeyBinding keyBinding = new KeyBinding("Start Break", Keyboard.KEY_J, "20 20 20");
     private int warnedTicks = 0;
     private Sk1erMod sk1erMod;
-    ;
 
     public Config getConfig() {
         return config;
@@ -122,8 +119,8 @@ public class TwentyTwentyTwentyMod {
     }
 
     private void ping() {
-        SoundHandler soundHandler = Minecraft.getMinecraft().getSoundHandler();
-        if (soundHandler != null && Minecraft.getMinecraft().theWorld != null) {
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer; // cast it to entityplayersp since they'll be the only ones hearing the sound
+        if (Minecraft.getMinecraft().theWorld != null) {
             Multithreading.runAsync(() -> {
                 long[] times = {0, 50, 50, 50, 400, 100, 100};
                 for (long time : times) {
@@ -132,7 +129,7 @@ public class TwentyTwentyTwentyMod {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    soundHandler.playSound(PositionedSoundRecord.create(new ResourceLocation("note.pling"), (float) Minecraft.getMinecraft().thePlayer.posX, (float) Minecraft.getMinecraft().thePlayer.posY, (float) Minecraft.getMinecraft().thePlayer.posZ));
+                    player.playSound(new SoundEvent(new ResourceLocation("block.note.pling")), 1.0f, 1.0f); // positionedsoundrecord.create doesnt exist in 1.9 anymore
                 }
             });
 
@@ -215,11 +212,8 @@ public class TwentyTwentyTwentyMod {
             GL11.glDisable(2848);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             ConfigGui.drawScaledText(String.valueOf((config.getDuration() * 20 - breakTicks) / 20), centerX, centerY - 10, 2.0, Color.YELLOW.getRGB(), true, true);
-            ConfigGui.drawScaledText("Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to cancel. ", current.getScaledWidth() / 2, 5, 2, Color.WHITE.getRGB(), true, true);
+            ConfigGui.drawScaledText("Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to cancel.", current.getScaledWidth() / 2, 5, 2, Color.WHITE.getRGB(), true, true);
             GlStateManager.popMatrix();
-
         }
     }
-
-
 }
