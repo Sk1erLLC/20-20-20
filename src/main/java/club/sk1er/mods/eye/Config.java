@@ -7,6 +7,24 @@ public class Config {
     private int corner = 1;
     private boolean enabled = true;
     private boolean chat = true;
+    private boolean pingWhenDone = true;
+    private boolean pingWhenReady = true;
+
+    public boolean isPingWhenDone() {
+        return pingWhenDone;
+    }
+
+    public void setPingWhenDone(boolean pingWhenDone) {
+        this.pingWhenDone = pingWhenDone;
+    }
+
+    public boolean isPingWhenReady() {
+        return pingWhenReady;
+    }
+
+    public void setPingWhenReady(boolean pingWhenReady) {
+        this.pingWhenReady = pingWhenReady;
+    }
 
     public boolean isChat() {
         return chat;

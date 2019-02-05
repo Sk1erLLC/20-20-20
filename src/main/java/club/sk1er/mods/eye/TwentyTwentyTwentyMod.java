@@ -1,9 +1,12 @@
 package club.sk1er.mods.eye;
 
 
+import club.sk1er.mods.eye.utils.Multithreading;
 import club.sk1er.mods.eye.utils.Sk1erMod;
 import com.google.gson.Gson;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -85,10 +88,14 @@ public class TwentyTwentyTwentyMod {
             return;
         timeForBreak = ++ticks >= config.getInterval() * 20 * 60;
         if (timeForBreak) {
-            warnedTicks++;
-            if (warnedTicks % 100 == 0 && config.isChat()) {
+            if (warnedTicks % (20 * 30) == 0 && config.isChat()) {
                 sk1erMod.sendMessage("Time to take a break. Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to start. ");
+                if (config.isPingWhenReady()) {
+                    ping();
+                }
             }
+            warnedTicks++;
+
         }
         if (keyBinding.isPressed()) {
             if (breaking) {
@@ -105,10 +112,31 @@ public class TwentyTwentyTwentyMod {
             breakTicks++;
             if (breakTicks > config.getDuration() * 20) {
                 breaking = false;
+                if (config.isPingWhenDone()) {
+                    ping();
+                }
             }
         }
 
 
+    }
+
+    private void ping() {
+        SoundHandler soundHandler = Minecraft.getMinecraft().getSoundHandler();
+        if (soundHandler != null && Minecraft.getMinecraft().theWorld != null) {
+            Multithreading.runAsync(() -> {
+                long[] times = {0, 50, 50, 50, 400, 100, 100};
+                for (long time : times) {
+                    try {
+                        Thread.sleep(time);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    soundHandler.playSound(PositionedSoundRecord.create(new ResourceLocation("note.pling"), (float) Minecraft.getMinecraft().thePlayer.posX, (float) Minecraft.getMinecraft().thePlayer.posY, (float) Minecraft.getMinecraft().thePlayer.posZ));
+                }
+            });
+
+        }
     }
 
     @SubscribeEvent
@@ -119,7 +147,7 @@ public class TwentyTwentyTwentyMod {
         if (event.phase != TickEvent.Phase.END) {
             return;
         }
-        if (timeForBreak) {
+        if (timeForBreak || Minecraft.getMinecraft().currentScreen instanceof ConfigGui) {
             GlStateManager.pushMatrix();
             ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
             int corner = config.getCorner();
@@ -146,7 +174,7 @@ public class TwentyTwentyTwentyMod {
             } else if (corner == 3) { //bottom left
                 GlStateManager.translate(0, scaledResolution.getScaledHeight() - height / scaledResolution.getScaleFactor(), 0);
             } else if (corner == 4) { //bottom right
-                GlStateManager.translate(scaledResolution.getScaledWidth() - width / scaledResolution.getScaleFactor(), scaledResolution.getScaledHeight() - height, 0);
+                GlStateManager.translate(scaledResolution.getScaledWidth() - width / scaledResolution.getScaleFactor(), scaledResolution.getScaledHeight() - height / scaledResolution.getScaleFactor(), 0);
             }
             GlStateManager.color(1.0F, 1.0F, 1.0F, (float) (.4 + .6 * animationFactor));
             GlStateManager.scale(1.0 + .25D * animationFactor, 1.0 + .25D * animationFactor, 0);

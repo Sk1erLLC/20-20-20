@@ -1,6 +1,7 @@
 package club.sk1er.mods.eye;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -76,30 +77,56 @@ public class ConfigGui extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
-        reg(new GuiButton(1, width / 2 - 100, 70, "Mod Status"), guiButton -> mod.getConfig().setEnabled(!mod.getConfig().isEnabled()), button -> button.displayString = EnumChatFormatting.YELLOW + "Mod Status: " + (mod.getConfig().isEnabled() ? EnumChatFormatting.GREEN + "Enabled" : EnumChatFormatting.RED + "Disabled"));
-        regSlider(new GuiSlider(2, width / 2 - 100, 120, 200, 20, "", " Minutes", 1, 60, mod.getConfig().getInterval(), false, true), guiButton -> {
+        Config config = mod.getConfig();
+        reg(new GuiButton(1, width / 2 - 100, 70, "Mod Status"), guiButton -> config.setEnabled(!config.isEnabled()), button -> button.displayString = EnumChatFormatting.YELLOW + "Mod Status: " + (config.isEnabled() ? EnumChatFormatting.GREEN + "Enabled" : EnumChatFormatting.RED + "Disabled"));
+        regSlider(new GuiSlider(2, width / 4 - 100, 120, 200, 20, "", " Minutes", 1, 60, config.getInterval(), false, true), guiButton -> {
 
         }, guiButton -> {
-            mod.getConfig().setInterval(((GuiSlider) guiButton).getValueInt());
+            config.setInterval(((GuiSlider) guiButton).getValueInt());
         });
-        regSlider(new GuiSlider(3, width / 2 - 100, 170, 200, 20, "", " Seconds", 1, 60, mod.getConfig().getDuration(), false, true), guiButton -> {
+        regSlider(new GuiSlider(3, width / 4 - 100, 170, 200, 20, "", " Seconds", 1, 60, config.getDuration(), false, true), guiButton -> {
 
         }, guiButton -> {
-            mod.getConfig().setDuration(((GuiSlider) guiButton).getValueInt());
+            config.setDuration(((GuiSlider) guiButton).getValueInt());
         });
-        reg(new GuiButton(4, width / 2 - 100, 220, "Chat Alerts"), guiButton -> mod.getConfig().setChat(!mod.getConfig().isChat()), button -> button.displayString = EnumChatFormatting.YELLOW + "Chat Alerts: " + (mod.getConfig().isChat() ? EnumChatFormatting.GREEN + "Yes" : EnumChatFormatting.RED + "No"));
+        reg(new GuiButton(4, width / 4 - 100, 220, "Chat Alerts"), guiButton -> config.setChat(!config.isChat()), button -> button.displayString = EnumChatFormatting.YELLOW + "Chat Alerts: " + (config.isChat() ? EnumChatFormatting.GREEN + "Yes" : EnumChatFormatting.RED + "No"));
 
+        reg(new GuiButton(5, width / 4 * 3 - 100, 120, "Notification Corner"), guiButton -> config.setCorner(config.getCorner() < 4 ? config.getCorner() + 1 : 1), button -> button.displayString = EnumChatFormatting.YELLOW + "Notification Corner: " + (EnumChatFormatting.GREEN + getCornerName(config.getCorner())));
+
+        reg(new GuiButton(6, width / 4 * 3 - 100, 170, "Ping When Ready"), guiButton -> config.setPingWhenReady(!config.isPingWhenReady()), button -> button.displayString = EnumChatFormatting.YELLOW + "Ping When Ready: " + (config.isPingWhenReady() ? EnumChatFormatting.GREEN + "Yes" : EnumChatFormatting.RED + "No"));
+        reg(new GuiButton(7, width / 4 * 3 - 100, 220, "Ping When Done"), guiButton -> config.setPingWhenDone(!config.isPingWhenDone()), button -> button.displayString = EnumChatFormatting.YELLOW + "Ping When Done: " + (config.isPingWhenDone() ? EnumChatFormatting.GREEN + "Yes" : EnumChatFormatting.RED + "No"));
+
+    }
+
+    private String getCornerName(int corner) {
+        switch (corner) {
+            case 1:
+                return "Top Left";
+            case 2:
+                return "Top Right";
+            case 3:
+                return "Bottom Left";
+            case 4:
+                return "Bottom Right";
+            default:
+                return "Error";
+        }
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+        Gui.drawRect(0, 0, width, height, new Color(0, 0, 0, 100).getRGB());
         super.drawScreen(mouseX, mouseY, partialTicks);
 
         drawScaledText(EnumChatFormatting.YELLOW + EnumChatFormatting.BOLD.toString() + EnumChatFormatting.UNDERLINE + "20 20 20", width / 2, 3, 3.0, Color.WHITE.getRGB(), true, true);
         drawScaledText(EnumChatFormatting.AQUA + "By Sk1er LLC", width / 2, 35, 2.0, Color.WHITE.getRGB(), true, true);
-        drawScaledText("Notification Interval", width / 2, 100, 2.0, Color.WHITE.getRGB(), true, true);
-        drawScaledText("Break Duration", width / 2, 150, 2.0, Color.WHITE.getRGB(), true, true);
-        drawScaledText("Chat Alerts", width / 2, 200, 2.0, Color.WHITE.getRGB(), true, true);
+        drawScaledText("Notification Interval", width / 4, 100, 2.0, Color.WHITE.getRGB(), true, true);
+        drawScaledText("Break Duration", width / 4, 150, 2.0, Color.WHITE.getRGB(), true, true);
+        drawScaledText("Chat Alerts", width / 4, 200, 2.0, Color.WHITE.getRGB(), true, true);
+
+        drawScaledText("Notification Corner", width / 4 * 3, 100, 2.0, Color.WHITE.getRGB(), true, true);
+        drawScaledText("Ping When Ready", width / 4 * 3, 150, 2.0, Color.WHITE.getRGB(), true, true);
+        drawScaledText("Ping When Done", width / 4 * 3, 200, 2.0, Color.WHITE.getRGB(), true, true);
 
 
     }
