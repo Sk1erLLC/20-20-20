@@ -3,8 +3,7 @@ package club.sk1er.mods.eye.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
@@ -34,7 +33,7 @@ public class Sk1erMod {
      */
     private static Sk1erMod instance;
     private boolean first = false;
-    private List<IChatComponent> updateMessage = new ArrayList<>();
+    private List<ITextComponent> updateMessage = new ArrayList<>();
     private String modid;
     private String version;
     private boolean enabled = true;
@@ -45,7 +44,7 @@ public class Sk1erMod {
     private JsonHolder en;
     private boolean hypixel;
     private GenKeyCallback callback;
-    private ConcurrentLinkedQueue<IChatComponent> messages = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<ITextComponent> messages = new ConcurrentLinkedQueue<>();
     private boolean firstFileStatus = false;
     private File dir;
 
@@ -54,9 +53,9 @@ public class Sk1erMod {
         this.version = version;
         this.name = name;
         instance = this;
-        prefix = EnumChatFormatting.RED + "[" + EnumChatFormatting.AQUA + this.name + EnumChatFormatting.RED + "]" + EnumChatFormatting.YELLOW + ": ";
+        prefix = ChatColor.RED + "[" + ChatColor.AQUA + this.name + ChatColor.RED + "]" + ChatColor.YELLOW + ": ";
         MinecraftForge.EVENT_BUS.register(this);
-        File mcDataDir = Minecraft.getMinecraft().mcDataDir;
+        File mcDataDir = Minecraft.getMinecraft().gameDir;
 
         dir = new File(mcDataDir, "sk1ermod");
         if (!dir.exists())
@@ -88,7 +87,7 @@ public class Sk1erMod {
         return true;
     }
 
-    public List<IChatComponent> getUpdateMessage() {
+    public List<ITextComponent> getUpdateMessage() {
         return updateMessage;
     }
 
@@ -104,9 +103,9 @@ public class Sk1erMod {
     public void tick(TickEvent.RenderTickEvent event) {
 
 
-        if (Minecraft.getMinecraft().thePlayer == null) return;
+        if (Minecraft.getMinecraft().player == null) return;
         while (!messages.isEmpty()) {
-            Minecraft.getMinecraft().thePlayer.addChatComponentMessage(messages.poll());
+            Minecraft.getMinecraft().player.sendMessage(messages.poll());
         }
     }
 
@@ -177,7 +176,7 @@ public class Sk1erMod {
                 FMLClientHandler.instance().getClient().getCurrentServerData().serverName.equalsIgnoreCase("HYPIXEL"));
         if (hasUpdate() || first) {
             Multithreading.runAsync(() -> {
-                while (Minecraft.getMinecraft().thePlayer == null) {
+                while (Minecraft.getMinecraft().player == null) {
                     try {
                         Thread.sleep(100L);
                     } catch (InterruptedException e) {
@@ -189,8 +188,8 @@ public class Sk1erMod {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                for (IChatComponent s : getUpdateMessage()) {
-                    Minecraft.getMinecraft().thePlayer.addChatComponentMessage(s);
+                for (ITextComponent s : getUpdateMessage()) {
+                    Minecraft.getMinecraft().player.sendMessage(s);
                 }
             });
         }

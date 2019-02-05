@@ -33,11 +33,11 @@ public enum ChatColor {
     private final boolean isFormat;
     private final String toString;
 
-    private ChatColor(char code) {
+    ChatColor(char code) {
         this(code, false);
     }
 
-    private ChatColor(char code, boolean isFormat) {
+    ChatColor(char code, boolean isFormat) {
         this.code = code;
         this.isFormat = isFormat;
         this.toString = new String(new char[] {COLOR_CHAR, code});
@@ -64,7 +64,7 @@ public enum ChatColor {
         if (input == null) {
             return null;
         }
-        return Pattern.compile("(?i)" + String.valueOf(COLOR_CHAR) + "[0-9A-FK-OR]").matcher(input).replaceAll("");
+        return Pattern.compile("(?i)" + COLOR_CHAR + "[0-9A-FK-OR]").matcher(input).replaceAll("");
     }
 
     public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
