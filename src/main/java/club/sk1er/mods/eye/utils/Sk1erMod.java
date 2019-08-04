@@ -115,39 +115,39 @@ public class Sk1erMod {
     }
 
     public void checkStatus() {
-        Multithreading.schedule(() -> {
-            en = new JsonHolder(rawWithAgent("http://sk1er.club/genkey?name=" + Minecraft.getMinecraft().getSession().getProfile().getName()
-                    + "&uuid=" + Minecraft.getMinecraft().getSession().getPlayerID().replace("-", "")
-                    + "&mcver=" + Minecraft.getMinecraft().getVersion()
-                    + "&modver=" + version
-                    + "&mod=" + modid
-            ));
-            if (callback != null)
-                callback.call(en);
-            System.out.println(en);
-            updateMessage.clear();
-            enabled = en.optBoolean("enabled");
-            hasUpdate = en.optBoolean("update");
-            apiKey = en.optString("key");
+        if (Minecraft.getMinecraft().gameSettings.snooperEnabled) {
+            Multithreading.schedule(() -> {
+                en = new JsonHolder(rawWithAgent("http://sk1er.club/genkey?name=" + Minecraft.getMinecraft().getSession().getProfile().getName()
+                        + "&uuid=" + Minecraft.getMinecraft().getSession().getPlayerID().replace("-", "")
+                        + "&mcver=" + Minecraft.getMinecraft().getVersion()
+                        + "&modver=" + version
+                        + "&mod=" + modid
+                ));
+                if (callback != null)
+                    callback.call(en);
+                System.out.println(en);
+                updateMessage.clear();
+                enabled = en.optBoolean("enabled");
+                hasUpdate = en.optBoolean("update");
+                apiKey = en.optString("key");
 
-            first = en.optBoolean("first");
-            checkFirst(en.optString("lock"), first);
-            if (hasUpdate) {
-                process(prefix + "----------------------------------");
+                first = en.optBoolean("first");
+                checkFirst(en.optString("lock"), first);
+                if (hasUpdate) {
+                    process(prefix + "----------------------------------");
 
-                process(" ");
-                process(prefix + "            " + name + " is out of date!");
-                process(prefix + "Update level: " + en.optString("level"));
-                process(prefix + "Update URL: " + en.optString("url"));
-                process(prefix + "Message from Sk1er: ");
-                process(prefix + en.optString("message"));
-                process(" ");
+                    process(" ");
+                    process(prefix + "            " + name + " is out of date!");
+                    process(prefix + "Update level: " + en.optString("level"));
+                    process(prefix + "Update URL: " + en.optString("url"));
+                    process(prefix + "Message from Sk1er: ");
+                    process(prefix + en.optString("message"));
+                    process(" ");
 
-                process(prefix + "----------------------------------");
-            }
-
-
-        }, 0, 5, TimeUnit.MINUTES);
+                    process(prefix + "----------------------------------");
+                }
+            }, 0, 5, TimeUnit.MINUTES);
+        }
     }
 
     private void process(String input) {

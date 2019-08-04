@@ -33,7 +33,7 @@ import java.io.IOException;
 public class TwentyTwentyTwentyMod {
 
     public static final String MODID = "20_20_20";
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "1.1";
     private final Gson gson = new Gson();
     private int breakTicks = 0;
     private Config config;
