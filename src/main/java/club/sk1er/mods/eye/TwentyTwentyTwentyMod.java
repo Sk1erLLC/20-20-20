@@ -33,7 +33,7 @@ import java.io.IOException;
 public class TwentyTwentyTwentyMod {
 
     public static final String MODID = "20_20_20";
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "1.2";
     private final Gson gson = new Gson();
     private Config config;
     private ResourceLocation textureLoc = new ResourceLocation("20_20_20", "break.png");
