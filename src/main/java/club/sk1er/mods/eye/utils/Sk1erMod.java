@@ -218,7 +218,6 @@ public class Sk1erMod {
             connection.setDoOutput(true);
             InputStream is = connection.getInputStream();
             return IOUtils.toString(is, Charset.defaultCharset());
-
         } catch (Exception e) {
             e.printStackTrace();
         }

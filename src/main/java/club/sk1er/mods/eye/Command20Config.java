@@ -1,7 +1,6 @@
 package club.sk1er.mods.eye;
 
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 
 public class Command20Config extends CommandBase {
@@ -27,7 +26,7 @@ public class Command20Config extends CommandBase {
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+    public void processCommand(ICommandSender sender, String[] args) {
         new ConfigGui(twentyTwentyTwentyMod).show();
     }
 }
