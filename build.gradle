@@ -46,6 +46,14 @@ processResources {
     }
 }
 
+jar {
+    manifest {
+        attributes "FMLCorePlugin": "club.sk1er.mods.modcore.FMLLoadingPlugin",
+                "ModSide": "CLIENT",
+                "FMLCorePluginContainsFMLMod": "Yes, yes it does"
+    }
+}
+
 task moveResources {
     doLast {
         ant.move file: "${buildDir}/resources/main",
