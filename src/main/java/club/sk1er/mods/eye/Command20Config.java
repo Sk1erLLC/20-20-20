@@ -1,14 +1,10 @@
 package club.sk1er.mods.eye;
 
+import club.sk1er.mods.core.ModCore;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
 public class Command20Config extends CommandBase {
-    private TwentyTwentyTwentyMod twentyTwentyTwentyMod;
-
-    public Command20Config(TwentyTwentyTwentyMod twentyTwentyTwentyMod) {
-        this.twentyTwentyTwentyMod = twentyTwentyTwentyMod;
-    }
 
     @Override
     public boolean canCommandSenderUseCommand(ICommandSender sender) {
@@ -27,6 +23,6 @@ public class Command20Config extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        new ConfigGui(twentyTwentyTwentyMod).show();
+        ModCore.getInstance().getGuiHandler().open(TwentyTwentyTwentyMod.instance.getConfig().gui());
     }
 }

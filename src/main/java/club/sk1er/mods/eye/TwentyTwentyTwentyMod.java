@@ -1,8 +1,9 @@
 package club.sk1er.mods.eye;
 
-import club.sk1er.mods.eye.utils.Multithreading;
-import club.sk1er.mods.eye.utils.Sk1erMod;
-import com.google.gson.Gson;
+import club.sk1er.mods.core.util.MinecraftUtils;
+import club.sk1er.mods.core.util.Multithreading;
+import club.sk1er.mods.modcore.ModCoreInstaller;
+import java.awt.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
@@ -11,6 +12,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -18,27 +20,21 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.apache.commons.io.FileUtils;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 
 @Mod(modid = TwentyTwentyTwentyMod.MODID, name = "20 20 20", version = TwentyTwentyTwentyMod.VERSION)
 public class TwentyTwentyTwentyMod {
 
     public static final String MODID = "20_20_20";
-    public static final String VERSION = "1.2";
-    private final Gson gson = new Gson();
-    private Config config;
-    private ResourceLocation textureLoc = new ResourceLocation("20_20_20", "break.png");
-    private KeyBinding keyBinding = new KeyBinding("Start Break", Keyboard.KEY_J, "20 20 20");
-    private Sk1erMod sk1erMod;
+    public static final String VERSION = "1.3";
+    private final ResourceLocation textureLoc = new ResourceLocation("20_20_20", "break.png");
+    private final KeyBinding keyBinding = new KeyBinding("Start Break", Keyboard.KEY_J, "20 20 20");
 
     private int breakTicks;
     private int ticks;
@@ -46,34 +42,24 @@ public class TwentyTwentyTwentyMod {
     private boolean timeForBreak;
     private int warnedTicks;
 
+    private boolean shouldPing;
+    private Config config;
+
+    @Instance(MODID)
+    public static TwentyTwentyTwentyMod instance;
+
     public Config getConfig() {
         return config;
     }
 
     @Mod.EventHandler
     public void init(FMLPreInitializationEvent event) {
-        File suggestedConfigurationFile = event.getSuggestedConfigurationFile();
-
-        try {
-            config = gson.fromJson(FileUtils.readFileToString(suggestedConfigurationFile, "UTF-8"), Config.class);
-        } catch (Exception e) {
-            System.out.println("No config file");
-        }
-
-        if (this.config == null) this.config = new Config();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                FileUtils.write(suggestedConfigurationFile, gson.toJson(config));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
+        ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
+        config = new Config();
+        config.preload();
         MinecraftForge.EVENT_BUS.register(this);
         ClientRegistry.registerKeyBinding(keyBinding);
-        sk1erMod = new Sk1erMod(MODID, VERSION, "20 20 20");
-        sk1erMod.checkStatus();
-        ClientCommandHandler.instance.registerCommand(new Command20Config(this));
+        ClientCommandHandler.instance.registerCommand(new Command20Config());
     }
 
     @SubscribeEvent
@@ -86,7 +72,8 @@ public class TwentyTwentyTwentyMod {
         timeForBreak = ++ticks >= config.getInterval() * 20 * 60;
         if (timeForBreak) {
             if (warnedTicks % (20 * 30) == 0 && config.isChat()) {
-                sk1erMod.sendMessage("Time to take a break. Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to start. ");
+                MinecraftUtils.sendMessage(EnumChatFormatting.GOLD + "[20 20 20] ",
+                    "Time to take a break. Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to start. ");
                 if (config.isPingWhenReady()) {
                     ping();
                 }
@@ -117,11 +104,22 @@ public class TwentyTwentyTwentyMod {
                 }
             }
         }
+
+        if (shouldPing) {
+            SoundHandler soundHandler = Minecraft.getMinecraft().getSoundHandler();
+            if (soundHandler != null) {
+                soundHandler
+                    .playSound(PositionedSoundRecord.create(new ResourceLocation("note.pling"),
+                        (float) Minecraft.getMinecraft().thePlayer.posX,
+                        (float) Minecraft.getMinecraft().thePlayer.posY,
+                        (float) Minecraft.getMinecraft().thePlayer.posZ));
+                shouldPing = false;
+            }
+        }
     }
 
     private void ping() {
-        SoundHandler soundHandler = Minecraft.getMinecraft().getSoundHandler();
-        if (soundHandler != null && Minecraft.getMinecraft().theWorld != null) {
+        if (Minecraft.getMinecraft().theWorld != null) {
             Multithreading.runAsync(() -> {
                 long[] times = {0, 50, 50, 50, 400, 100, 100};
                 for (long time : times) {
@@ -131,13 +129,9 @@ public class TwentyTwentyTwentyMod {
                         e.printStackTrace();
                     }
 
-                    soundHandler.playSound(PositionedSoundRecord.create(new ResourceLocation("note.pling"),
-                            (float) Minecraft.getMinecraft().thePlayer.posX,
-                            (float) Minecraft.getMinecraft().thePlayer.posY,
-                            (float) Minecraft.getMinecraft().thePlayer.posZ));
+                    shouldPing = true;
                 }
             });
-
         }
     }
 
@@ -147,7 +141,7 @@ public class TwentyTwentyTwentyMod {
             return;
         }
 
-        if (timeForBreak || Minecraft.getMinecraft().currentScreen instanceof ConfigGui) {
+        if (timeForBreak) {
             GlStateManager.pushMatrix();
             ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
             int corner = config.getCorner();
@@ -230,23 +224,33 @@ public class TwentyTwentyTwentyMod {
             GL11.glDisable(GL11.GL_LINE_SMOOTH);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-            ConfigGui.drawScaledText(String.valueOf((config.getDuration() * 20 - breakTicks) / 20),
+            drawScaledText(String.valueOf((config.getDuration() * 20 - breakTicks) / 20),
                     centerX,
                     centerY - 10,
                     2.0,
-                    Color.YELLOW.getRGB(),
-                    true,
-                    true);
+                    Color.YELLOW.getRGB()
+            );
 
-            ConfigGui.drawScaledText("Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to cancel. ",
+            drawScaledText("Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to cancel. ",
                     current.getScaledWidth() / 2,
                     5,
                     2,
-                    Color.WHITE.getRGB(),
-                    true,
-                    true);
+                    Color.WHITE.getRGB()
+            );
 
             GlStateManager.popMatrix();
         }
+    }
+
+    private void drawScaledText(String text, int trueX, int trueY, double scaleFac, int color) {
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(scaleFac, scaleFac, scaleFac);
+        Minecraft.getMinecraft().fontRendererObj.drawString(text,
+            (float) (((double) trueX) / scaleFac) - (Minecraft.getMinecraft().fontRendererObj.getStringWidth(text) >> 1),
+            (float) (((double) trueY) / scaleFac),
+            color,
+            true);
+        GlStateManager.scale(1 / scaleFac, 1 / scaleFac, 1 / scaleFac);
+        GlStateManager.popMatrix();
     }
 }
