@@ -1,6 +1,6 @@
 package club.sk1er.mods.eye;
 
-import club.sk1er.mods.core.ModCore;
+import gg.essential.api.EssentialAPI;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
@@ -23,6 +23,6 @@ public class Command20Config extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        ModCore.getInstance().getGuiHandler().open(TwentyTwentyTwentyMod.instance.getConfig().gui());
+        EssentialAPI.getGuiUtil().openScreen(TwentyTwentyTwentyMod.instance.getConfig().gui());
     }
 }

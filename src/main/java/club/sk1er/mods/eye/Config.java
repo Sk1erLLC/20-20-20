@@ -1,8 +1,9 @@
 package club.sk1er.mods.eye;
 
-import club.sk1er.vigilance.Vigilant;
-import club.sk1er.vigilance.data.Property;
-import club.sk1er.vigilance.data.PropertyType;
+import gg.essential.vigilance.Vigilant;
+import gg.essential.vigilance.data.Property;
+import gg.essential.vigilance.data.PropertyType;
+
 import java.io.File;
 
 public class Config extends Vigilant {

@@ -1,9 +1,9 @@
 package club.sk1er.mods.eye;
 
-import club.sk1er.mods.core.util.MinecraftUtils;
-import club.sk1er.mods.core.util.Multithreading;
-import club.sk1er.mods.modcore.ModCoreInstaller;
 import java.awt.Color;
+
+import gg.essential.api.EssentialAPI;
+import gg.essential.api.utils.Multithreading;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
@@ -54,7 +54,6 @@ public class TwentyTwentyTwentyMod {
 
     @Mod.EventHandler
     public void init(FMLPreInitializationEvent event) {
-        ModCoreInstaller.initializeModCore(Minecraft.getMinecraft().mcDataDir);
         config = new Config();
         config.preload();
         MinecraftForge.EVENT_BUS.register(this);
@@ -72,8 +71,8 @@ public class TwentyTwentyTwentyMod {
         timeForBreak = ++ticks >= config.getInterval() * 20 * 60;
         if (timeForBreak) {
             if (warnedTicks % (20 * 30) == 0 && config.isChat()) {
-                MinecraftUtils.sendMessage(EnumChatFormatting.GOLD + "[20 20 20] ",
-                    "Time to take a break. Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to start. ");
+                EssentialAPI.getMinecraftUtil().sendMessage(EnumChatFormatting.GOLD + "[20 20 20] ",
+                        "Time to take a break. Press " + Keyboard.getKeyName(keyBinding.getKeyCode()) + " to start. ");
                 if (config.isPingWhenReady()) {
                     ping();
                 }
