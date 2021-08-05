@@ -32,7 +32,7 @@ import org.lwjgl.opengl.GL11;
 public class TwentyTwentyTwentyMod {
 
     public static final String MODID = "20_20_20";
-    public static final String VERSION = "1.3";
+    public static final String VERSION = "1.4";
     private final ResourceLocation textureLoc = new ResourceLocation("20_20_20", "break.png");
     private final KeyBinding keyBinding = new KeyBinding("Start Break", Keyboard.KEY_J, "20 20 20");
 
